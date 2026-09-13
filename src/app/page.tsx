@@ -40,8 +40,11 @@ export default async function DashboardPage() {
           <div className="border rounded-lg p-8 text-center flex flex-col items-center gap-4">
             <h2 className="text-xl font-semibold">Welcome to Daily Optimizer!</h2>
             <p className="text-muted-foreground">You don't have any routines set up yet.</p>
-            <form action={seedDefaultHabits}>
-              <button className="bg-foreground text-background px-4 py-2 rounded-md hover:opacity-90">
+            <form action={async () => {
+              'use server';
+              await seedDefaultHabits();
+            }}>
+              <button className="bg-indigo-600 text-white font-medium px-6 py-2.5 rounded-full hover:bg-indigo-700 transition-colors shadow-sm">
                 Load Default Habits
               </button>
             </form>

@@ -63,7 +63,7 @@ export function ProgressCharts({ habits, logs }: { habits: Habit[], logs: Log[] 
                 <XAxis dataKey="date" tick={{ fontSize: 12 }} />
                 <YAxis domain={[0, 100]} tickFormatter={(val) => `${val}%`} />
                 <Tooltip 
-                  formatter={(value: number) => [`${value}%`, 'Completed']}
+                  formatter={(value: any) => [`${value}%`, 'Completed']}
                   labelFormatter={(label) => `Date: ${label}`}
                   contentStyle={{ backgroundColor: 'hsl(var(--background))', borderColor: 'hsl(var(--border))' }}
                 />
