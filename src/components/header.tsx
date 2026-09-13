@@ -24,6 +24,9 @@ export async function Header() {
               <Link href="/habits" className="font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors hidden sm:block">
                 Manage Habits
               </Link>
+              <Link href="/profile" className="font-medium text-slate-600 dark:text-slate-300 hover:text-indigo-600 dark:hover:text-indigo-400 transition-colors hidden sm:block">
+                Profile
+              </Link>
               <form action={signout}>
                 <button className="py-2 px-4 rounded-full font-medium text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950 transition-colors">
                   Logout

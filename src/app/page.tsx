@@ -25,6 +25,9 @@ export default async function DashboardPage() {
     .eq('date', today)
 
   const hasHabits = habits && habits.length > 0;
+  
+  const firstName = user.user_metadata?.first_name;
+  const greeting = firstName ? `Hey ${firstName}, ` : '';
 
   return (
     <div className="flex-1 w-full flex flex-col items-center min-h-screen bg-slate-50 dark:bg-neutral-950">
@@ -32,7 +35,7 @@ export default async function DashboardPage() {
       
       <main className="flex-1 flex flex-col gap-6 w-full max-w-5xl px-4 py-10">
         <div className="flex flex-col gap-1 mb-4">
-          <h1 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-50">Your Daily Routine</h1>
+          <h1 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-50">{greeting}Your Daily Routine</h1>
           <p className="text-lg text-slate-500 dark:text-slate-400">Check off your habits for today ({today}).</p>
         </div>
         
