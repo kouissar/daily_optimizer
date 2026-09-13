@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { toggleHabitLog } from '@/app/actions/habits'
 import { Check } from 'lucide-react'
 
@@ -9,9 +9,11 @@ type Habit = { id: string; category_id: string; name: string; description: strin
 type Log = { id: string; habit_id: string; completed: boolean; value: number }
 
 export function Checklist({ categories, habits, logs, date }: { categories: Category[], habits: Habit[], logs: Log[], date: string }) {
-  const [localLogs, setLocalLogs] = useState<Record<string, Log>>(
-    logs.reduce((acc, log) => ({ ...acc, [log.habit_id]: log }), {})
-  )
+  const [localLogs, setLocalLogs] = useState<Record<string, Log>>({})
+
+  useEffect(() => {
+    setLocalLogs(logs.reduce((acc, log) => ({ ...acc, [log.habit_id]: log }), {}))
+  }, [logs, date])
 
   const handleToggle = async (habitId: string, completed: boolean) => {
     setLocalLogs(prev => ({
