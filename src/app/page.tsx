@@ -3,8 +3,13 @@ import { redirect } from 'next/navigation'
 import { Header } from '@/components/header'
 import { Checklist } from '@/components/checklist'
 import { seedDefaultHabits } from '@/app/actions/habits'
+import { DatePicker } from '@/components/date-picker'
 
-export default async function DashboardPage() {
+export default async function DashboardPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ date?: string }>
+}) {
   const supabase = await createClient()
 
   const { data: { user }, error } = await supabase.auth.getUser()
@@ -16,8 +21,13 @@ export default async function DashboardPage() {
   const { data: categories } = await supabase.from('categories').select('*').order('created_at')
   const { data: habits } = await supabase.from('habits').select('*').order('created_at')
   
-  // Get today's date in YYYY-MM-DD format (local time approximation)
-  const today = new Date().toISOString().split('T')[0]
+  // Get date from URL or default to today's date
+  const params = await searchParams;
+  
+  // A small trick: to get the local date string in YYYY-MM-DD instead of strict UTC, 
+  // we can use a basic timezone offset, but for server components UTC is safest.
+  // We'll let the user change it easily via the DatePicker.
+  const today = params.date || new Date().toISOString().split('T')[0]
   
   const { data: logs } = await supabase
     .from('daily_logs')
@@ -36,7 +46,9 @@ export default async function DashboardPage() {
       <main className="flex-1 flex flex-col gap-6 w-full max-w-5xl px-4 py-10">
         <div className="flex flex-col gap-1 mb-4">
           <h1 className="text-4xl font-bold tracking-tight text-slate-900 dark:text-slate-50">{greeting}Your Daily Routine</h1>
-          <p className="text-lg text-slate-500 dark:text-slate-400">Check off your habits for today ({today}).</p>
+          <div className="text-lg text-slate-500 dark:text-slate-400 flex items-center flex-wrap">
+            Check off your habits for: <DatePicker currentDate={today} />
+          </div>
         </div>
         
         {!hasHabits ? (
@@ -53,7 +65,7 @@ export default async function DashboardPage() {
             </form>
           </div>
         ) : (
-          <Checklist categories={categories || []} habits={habits || []} logs={logs || []} date={today} />
+          <Checklist key={today} categories={categories || []} habits={habits || []} logs={logs || []} date={today} />
         )}
       </main>
     </div>
