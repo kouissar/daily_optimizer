@@ -36,35 +36,38 @@ export function HabitManager({ categories, habits }: { categories: Category[], h
   }
 
   return (
-    <div className="flex flex-col gap-12 w-full">
+    <div className="flex flex-col gap-8 w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
       {/* Category Management */}
-      <section className="bg-card border rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-4">Add a Category</h2>
-        <form onSubmit={handleAddCategory} className="flex gap-4">
-          <input
-            type="text"
-            value={newCatName}
-            onChange={e => setNewCatName(e.target.value)}
-            placeholder="e.g. Finance, Hobbies"
-            className="flex-1 rounded-md px-4 py-2 border bg-background"
-            required
-          />
-          <button disabled={isSubmitting} type="submit" className="bg-foreground text-background px-4 py-2 rounded-md hover:opacity-90">
+      <section className="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-6 rounded-2xl shadow-sm">
+        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-6">Add a Category</h2>
+        <form onSubmit={handleAddCategory} className="flex flex-col sm:flex-row gap-4 items-end">
+          <div className="flex flex-col gap-2 flex-1 w-full">
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Category Name</label>
+            <input
+              type="text"
+              value={newCatName}
+              onChange={e => setNewCatName(e.target.value)}
+              placeholder="e.g. Finance, Hobbies"
+              className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-neutral-700 bg-transparent focus:ring-2 focus:ring-indigo-600 outline-none w-full"
+              required
+            />
+          </div>
+          <button disabled={isSubmitting} type="submit" className="bg-indigo-600 text-white font-medium px-6 py-2.5 rounded-full hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-70 w-full sm:w-auto">
             Add Category
           </button>
         </form>
       </section>
 
       {/* Habit Management */}
-      <section className="bg-card border rounded-lg p-6">
-        <h2 className="text-xl font-semibold mb-4">Add a New Habit</h2>
-        <form onSubmit={handleAddHabit} className="flex flex-col gap-4">
+      <section className="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-6 rounded-2xl shadow-sm">
+        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-6">Add a New Habit</h2>
+        <form onSubmit={handleAddHabit} className="flex flex-col gap-5">
           <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium">Category</label>
+            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Category</label>
             <select
               value={newHabit.categoryId}
               onChange={e => setNewHabit({...newHabit, categoryId: e.target.value})}
-              className="rounded-md px-4 py-2 border bg-background"
+              className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-neutral-700 bg-transparent focus:ring-2 focus:ring-indigo-600 outline-none"
               required
             >
               <option value="">Select a category</option>
@@ -74,82 +77,86 @@ export function HabitManager({ categories, habits }: { categories: Category[], h
             </select>
           </div>
           
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium">Habit Name</label>
-            <input
-              type="text"
-              value={newHabit.name}
-              onChange={e => setNewHabit({...newHabit, name: e.target.value})}
-              placeholder="e.g. Read a book"
-              className="rounded-md px-4 py-2 border bg-background"
-              required
-            />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Habit Name</label>
+              <input
+                type="text"
+                value={newHabit.name}
+                onChange={e => setNewHabit({...newHabit, name: e.target.value})}
+                placeholder="e.g. Read a book"
+                className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-neutral-700 bg-transparent focus:ring-2 focus:ring-indigo-600 outline-none"
+                required
+              />
+            </div>
+
+            <div className="flex flex-col gap-2">
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Description (Optional)</label>
+              <input
+                type="text"
+                value={newHabit.description}
+                onChange={e => setNewHabit({...newHabit, description: e.target.value})}
+                placeholder="e.g. 20 minutes before bed"
+                className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-neutral-700 bg-transparent focus:ring-2 focus:ring-indigo-600 outline-none"
+              />
+            </div>
           </div>
 
-          <div className="flex flex-col gap-2">
-            <label className="text-sm font-medium">Description (Optional)</label>
-            <input
-              type="text"
-              value={newHabit.description}
-              onChange={e => setNewHabit({...newHabit, description: e.target.value})}
-              placeholder="e.g. Read for 20 minutes before bed"
-              className="rounded-md px-4 py-2 border bg-background"
-            />
-          </div>
-
-          <div className="flex gap-4">
+          <div className="flex flex-col sm:flex-row gap-5">
             <div className="flex-1 flex flex-col gap-2">
-              <label className="text-sm font-medium">Tracking Type</label>
+              <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Tracking Type</label>
               <select
                 value={newHabit.type}
                 onChange={e => setNewHabit({...newHabit, type: e.target.value})}
-                className="rounded-md px-4 py-2 border bg-background"
+                className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-neutral-700 bg-transparent focus:ring-2 focus:ring-indigo-600 outline-none"
               >
                 <option value="boolean">Done / Not Done</option>
-                <option value="value">Number / Value (e.g. minutes, pages)</option>
+                <option value="value">Number / Value Tracking</option>
               </select>
             </div>
             {newHabit.type === 'value' && (
               <div className="flex-1 flex flex-col gap-2">
-                <label className="text-sm font-medium">Unit</label>
+                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">Measurement Unit</label>
                 <input
                   type="text"
                   value={newHabit.unit}
                   onChange={e => setNewHabit({...newHabit, unit: e.target.value})}
                   placeholder="e.g. pages, mins, reps"
-                  className="rounded-md px-4 py-2 border bg-background"
+                  className="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-neutral-700 bg-transparent focus:ring-2 focus:ring-indigo-600 outline-none"
                   required
                 />
               </div>
             )}
           </div>
 
-          <button disabled={isSubmitting} type="submit" className="bg-foreground text-background px-4 py-2 rounded-md hover:opacity-90 mt-4">
-            Add Habit
-          </button>
+          <div className="mt-2 flex justify-end">
+            <button disabled={isSubmitting} type="submit" className="bg-indigo-600 text-white font-medium px-6 py-2.5 rounded-full hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-70 w-full sm:w-auto">
+              Add Habit
+            </button>
+          </div>
         </form>
       </section>
 
       {/* Existing Habits List */}
       <section>
-        <h2 className="text-xl font-semibold mb-4">Your Current Habits</h2>
-        <div className="flex flex-col gap-6">
+        <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100 mb-4 ml-1">Your Current Habits</h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {categories.map(category => {
             const catHabits = habits.filter(h => h.category_id === category.id)
             if (catHabits.length === 0) return null
             return (
-              <div key={category.id} className="border p-4 rounded-lg bg-card">
-                <h3 className="font-semibold text-lg border-b pb-2 mb-3">{category.name}</h3>
+              <div key={category.id} className="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-5 rounded-2xl shadow-sm">
+                <h3 className="font-bold text-lg text-slate-800 dark:text-slate-200 border-b border-slate-100 dark:border-neutral-800 pb-3 mb-3">{category.name}</h3>
                 <ul className="flex flex-col gap-2">
                   {catHabits.map(habit => (
-                    <li key={habit.id} className="flex justify-between items-center py-2">
-                      <div>
-                        <span className="font-medium">{habit.name}</span>
-                        {habit.type === 'value' && <span className="text-xs ml-2 text-muted-foreground border rounded px-1 py-0.5">{habit.unit}</span>}
+                    <li key={habit.id} className="flex justify-between items-center py-2 px-1 hover:bg-slate-50 dark:hover:bg-neutral-800/50 rounded-lg transition-colors group">
+                      <div className="flex flex-col">
+                        <span className="font-medium text-slate-700 dark:text-slate-300">{habit.name}</span>
+                        {habit.type === 'value' && <span className="text-xs text-indigo-600 dark:text-indigo-400 font-medium">Tracks: {habit.unit}</span>}
                       </div>
                       <button 
                         onClick={() => handleDeleteHabit(habit.id)}
-                        className="text-red-500 hover:text-red-700 text-sm px-2 py-1 rounded bg-red-50 dark:bg-red-950"
+                        className="text-red-500 hover:text-white hover:bg-red-500 text-sm px-3 py-1.5 rounded-full font-medium transition-colors opacity-100 md:opacity-0 md:group-hover:opacity-100 bg-red-50 dark:bg-red-950/30"
                       >
                         Delete
                       </button>
