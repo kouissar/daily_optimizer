@@ -30,18 +30,20 @@ export async function seedDefaultHabits() {
     { category_id: catMap['Health & Fitness'], user_id: user.id, name: 'Plank', description: 'Beat or maintain benchmark', type: 'value', unit: 'minutes' },
     { category_id: catMap['Health & Fitness'], user_id: user.id, name: 'Morning Sun', description: '10 mins walk in the sun', type: 'boolean' },
     { category_id: catMap['Health & Fitness'], user_id: user.id, name: 'Post-Meal Walk', description: 'Walk after lunch or big meals', type: 'boolean' },
-    { category_id: catMap['Health & Fitness'], user_id: user.id, name: 'Take Atorvastatin', type: 'boolean' },
+    { category_id: catMap['Health & Fitness'], user_id: user.id, name: 'Stretching / Yoga', description: '15 mins of mobility work', type: 'boolean' },
     
     { category_id: catMap['Diet & Nutrition'], user_id: user.id, name: 'Vitamin D', type: 'boolean' },
-    { category_id: catMap['Diet & Nutrition'], user_id: user.id, name: 'Multi-vitamin', type: 'boolean' },
-    { category_id: catMap['Diet & Nutrition'], user_id: user.id, name: 'Eat 1-2 cloves', type: 'boolean' },
+    { category_id: catMap['Diet & Nutrition'], user_id: user.id, name: 'Hydration', description: 'Drink 8 glasses of water', type: 'value', unit: 'glasses' },
+    { category_id: catMap['Diet & Nutrition'], user_id: user.id, name: 'Eat Greens', description: 'At least one serving of vegetables', type: 'boolean' },
     
     { category_id: catMap['Mental & Spiritual'], user_id: user.id, name: 'Wim Hof breathing', type: 'boolean' },
     { category_id: catMap['Mental & Spiritual'], user_id: user.id, name: 'Cold shower', type: 'boolean' },
     { category_id: catMap['Mental & Spiritual'], user_id: user.id, name: 'Meditation', type: 'boolean' },
+    { category_id: catMap['Mental & Spiritual'], user_id: user.id, name: 'Gratitude Journal', description: 'Write down 3 things you are grateful for', type: 'boolean' },
     
     { category_id: catMap['Skills & Learning'], user_id: user.id, name: 'Practice Spanish', type: 'boolean' },
     { category_id: catMap['Skills & Learning'], user_id: user.id, name: 'Learn a new topic', description: 'e.g., Wealth of Nations', type: 'boolean' },
+    { category_id: catMap['Skills & Learning'], user_id: user.id, name: 'Read a Book', description: 'Daily reading habit', type: 'value', unit: 'pages' },
   ]
 
   const { error: habError } = await supabase.from('habits').insert(defaultHabits)
