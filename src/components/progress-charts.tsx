@@ -9,6 +9,7 @@ type Log = { id: string; date: string; habit_id: string; completed: boolean; val
 
 export function ProgressCharts({ habits, logs }: { habits: Habit[], logs: Log[] }) {
   const [selectedHabitId, setSelectedHabitId] = useState<string>(habits[0]?.id || '')
+  const [daysFilter, setDaysFilter] = useState<number>(14)
 
   // Calculate Metrics
   const metrics = useMemo(() => {
@@ -24,7 +25,7 @@ export function ProgressCharts({ habits, logs }: { habits: Habit[], logs: Log[] 
       if (log.completed) dateGroups[log.date] += 1
     })
 
-    const overallTrend = uniqueDates.slice(-14).map(date => ({
+    const overallTrend = uniqueDates.slice(-daysFilter).map(date => ({
       date,
       rate: Math.round((dateGroups[date] / habits.length) * 100)
     }))
@@ -46,7 +47,7 @@ export function ProgressCharts({ habits, logs }: { habits: Habit[], logs: Log[] 
     const avgRate = totalPossible > 0 ? Math.round((totalCompletions / totalPossible) * 100) : 0
 
     return { overallTrend, habitStats, bestHabit, needsWorkHabit, avgRate, uniqueDates }
-  }, [habits, logs])
+  }, [habits, logs, daysFilter])
 
   // Selected Habit Data
   const selectedHabitData = useMemo(() => {
@@ -54,7 +55,7 @@ export function ProgressCharts({ habits, logs }: { habits: Habit[], logs: Log[] 
     const habit = metrics.habitStats.find(h => h.id === selectedHabitId)
     if (!habit) return []
 
-    return metrics.uniqueDates.slice(-14).map(date => {
+    return metrics.uniqueDates.slice(-daysFilter).map(date => {
       const log = habit.habitLogs.find(l => l.date === date)
       return {
         date,
@@ -62,7 +63,7 @@ export function ProgressCharts({ habits, logs }: { habits: Habit[], logs: Log[] 
         value: log?.value || 0
       }
     })
-  }, [metrics, selectedHabitId])
+  }, [metrics, selectedHabitId, daysFilter])
 
   if (!metrics) {
     return (
@@ -123,9 +124,21 @@ export function ProgressCharts({ habits, logs }: { habits: Habit[], logs: Log[] 
       {/* Middle Row (2 Columns: Main Chart & Top Performers) */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 w-full">
         {/* Main Overall Trend Chart */}
-        <div className="lg:col-span-2 bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-6 rounded-2xl shadow-sm">
-          <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100 mb-6">Overall Consistency (Last 14 Days)</h2>
-          <div className="h-64 w-full">
+        <div className="lg:col-span-2 bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-6 rounded-2xl shadow-sm flex flex-col">
+          <div className="flex justify-between items-center mb-6">
+            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Overall Consistency</h2>
+            <select 
+              className="px-3 py-1.5 rounded-lg border border-slate-200 dark:border-neutral-700 bg-slate-50 dark:bg-neutral-800 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-indigo-600"
+              value={daysFilter}
+              onChange={(e) => setDaysFilter(Number(e.target.value))}
+            >
+              <option value={7}>Last 7 days</option>
+              <option value={14}>Last 14 days</option>
+              <option value={21}>Last 21 days</option>
+              <option value={28}>Last 28 days</option>
+            </select>
+          </div>
+          <div className="flex-1 w-full min-h-[250px]">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart data={metrics.overallTrend} margin={{ top: 5, right: 10, bottom: 5, left: -20 }}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" strokeOpacity={0.5} />
