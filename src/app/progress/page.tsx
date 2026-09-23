@@ -14,6 +14,9 @@ export default async function ProgressPage() {
   // Fetch all habits to know the denominator
   const { data: habits } = await supabase.from('habits').select('*')
   
+  // Fetch categories for radar charts
+  const { data: categories } = await supabase.from('categories').select('*')
+  
   // Fetch all logs to know what was completed
   const { data: logs } = await supabase.from('daily_logs').select('*').order('date', { ascending: true })
 
@@ -33,7 +36,7 @@ export default async function ProgressPage() {
             <p className="text-muted-foreground">You need to add some habits first!</p>
           </div>
         ) : (
-          <ProgressCharts habits={habits} logs={logs || []} />
+          <ProgressCharts categories={categories || []} habits={habits} logs={logs || []} />
         )}
       </main>
     </div>

@@ -1,13 +1,14 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts'
 import { Activity, TrendingUp, Award, Target } from 'lucide-react'
 
-type Habit = { id: string; name: string; type: string; unit: string }
+type Category = { id: string; name: string }
+type Habit = { id: string; name: string; type: string; unit: string; category_id: string }
 type Log = { id: string; date: string; habit_id: string; completed: boolean; value?: number }
 
-export function ProgressCharts({ habits, logs }: { habits: Habit[], logs: Log[] }) {
+export function ProgressCharts({ categories, habits, logs }: { categories: Category[], habits: Habit[], logs: Log[] }) {
   const [selectedHabitId, setSelectedHabitId] = useState<string>(habits[0]?.id || '')
   const [daysFilter, setDaysFilter] = useState<number>(14)
 
@@ -64,6 +65,43 @@ export function ProgressCharts({ habits, logs }: { habits: Habit[], logs: Log[] 
       }
     })
   }, [metrics, selectedHabitId, daysFilter])
+
+  // Deep Dive Metrics
+  const deepDiveMetrics = useMemo(() => {
+    if (!metrics) return { dayOfWeekData: [], categoryData: [] }
+    
+    const daysOfWeek = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+    const dayStats = daysOfWeek.map(day => ({ day, completed: 0, total: 0 }))
+    
+    const recentLogs = logs.filter(l => metrics.uniqueDates.slice(-daysFilter).includes(l.date))
+    
+    recentLogs.forEach(log => {
+      const dateObj = new Date(log.date + 'T12:00:00')
+      const dayIndex = dateObj.getDay()
+      dayStats[dayIndex].total += 1
+      if (log.completed) dayStats[dayIndex].completed += 1
+    })
+
+    const dayOfWeekData = dayStats.map(s => ({
+      day: s.day.substring(0, 3),
+      fullDay: s.day,
+      rate: s.total > 0 ? Math.round((s.completed / s.total) * 100) : 0
+    }))
+
+    const categoryData = categories.map(cat => {
+      const catHabitIds = habits.filter(h => h.category_id === cat.id).map(h => h.id)
+      if (catHabitIds.length === 0) return { subject: cat.name, A: 0, fullMark: 100 }
+      
+      const catLogs = recentLogs.filter(l => catHabitIds.includes(l.habit_id))
+      const completed = catLogs.filter(l => l.completed).length
+      const total = catLogs.length
+      
+      const rate = total > 0 ? Math.round((completed / total) * 100) : 0
+      return { subject: cat.name, A: rate, fullMark: 100 }
+    })
+
+    return { dayOfWeekData, categoryData }
+  }, [logs, categories, habits, metrics, daysFilter])
 
   if (!metrics) {
     return (
@@ -177,11 +215,60 @@ export function ProgressCharts({ habits, logs }: { habits: Habit[], logs: Log[] 
         </div>
       </div>
 
+      {/* NEW: Deep Dive Analytics Row */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full">
+        {/* Category Balance */}
+        <div className="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-6 rounded-2xl shadow-sm flex flex-col">
+          <div className="mb-2">
+            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Category Balance</h2>
+            <p className="text-sm text-slate-500">Your consistency across different life areas.</p>
+          </div>
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <RadarChart cx="50%" cy="50%" outerRadius="70%" data={deepDiveMetrics.categoryData}>
+                <PolarGrid stroke="var(--color-border)" />
+                <PolarAngleAxis dataKey="subject" tick={{ fontSize: 12, fill: '#64748b' }} />
+                <PolarRadiusAxis angle={30} domain={[0, 100]} tick={{ fontSize: 10, fill: '#cbd5e1' }} />
+                <Radar name="Completion Rate" dataKey="A" stroke="#4f46e5" fill="#4f46e5" fillOpacity={0.3} />
+                <Tooltip 
+                  formatter={(value: any) => [`${value}%`, 'Consistency']}
+                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                />
+              </RadarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+
+        {/* Day of Week Performance */}
+        <div className="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-6 rounded-2xl shadow-sm flex flex-col">
+          <div className="mb-2">
+            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Day of the Week Performance</h2>
+            <p className="text-sm text-slate-500">Your average completion rate by day.</p>
+          </div>
+          <div className="h-64 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <BarChart data={deepDiveMetrics.dayOfWeekData} margin={{ top: 15, right: 10, bottom: 5, left: -20 }}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--color-border)" strokeOpacity={0.5} />
+                <XAxis dataKey="day" tick={{ fontSize: 12, fill: '#888' }} axisLine={false} tickLine={false} dy={10} />
+                <YAxis domain={[0, 100]} tick={{ fontSize: 12, fill: '#888' }} tickFormatter={() => ''} axisLine={false} tickLine={false} />
+                <Tooltip 
+                  formatter={(value: any) => [`${value}%`, 'Completion Rate']}
+                  labelFormatter={(label, payload) => payload?.[0]?.payload?.fullDay || label}
+                  cursor={{ fill: 'rgba(16, 185, 129, 0.1)' }}
+                  contentStyle={{ borderRadius: '12px', border: 'none', boxShadow: '0 4px 6px -1px rgb(0 0 0 / 0.1)' }}
+                />
+                <Bar dataKey="rate" fill="#10b981" radius={[4, 4, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
+      </div>
+
       {/* Bottom Row: Individual Habit Tracker */}
       <div className="bg-white dark:bg-neutral-900 border border-slate-200 dark:border-neutral-800 p-6 rounded-2xl shadow-sm">
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
           <div>
-            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Deep Dive: Individual Habits</h2>
+            <h2 className="text-lg font-bold text-slate-800 dark:text-slate-100">Individual Habit Logs</h2>
             <p className="text-sm text-slate-500">Track the performance of a specific habit.</p>
           </div>
           <select 
