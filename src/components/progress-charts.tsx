@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar, Radar, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis } from 'recharts'
-import { Activity, TrendingUp, Award, Target } from 'lucide-react'
+import { Activity, TrendingUp, Award, Target, Flame, Crown, Star, Trophy } from 'lucide-react'
 
 type Category = { id: string; name: string }
 type Habit = { id: string; name: string; type: string; unit: string; category_id: string }
@@ -47,7 +47,45 @@ export function ProgressCharts({ categories, habits, logs }: { categories: Categ
     const totalPossible = uniqueDates.length * habits.length
     const avgRate = totalPossible > 0 ? Math.round((totalCompletions / totalPossible) * 100) : 0
 
-    return { overallTrend, habitStats, bestHabit, needsWorkHabit, avgRate, uniqueDates }
+    // Gamification: Streaks & Perfect Days
+    let currentStreak = 0;
+    let bestStreak = 0;
+    let tempStreak = 0;
+    let perfectDays = 0;
+
+    const ONE_DAY = 24 * 60 * 60 * 1000;
+    const completedDates = Array.from(new Set(logs.filter(l => l.completed).map(l => l.date))).sort()
+
+    for (let i = 0; i < completedDates.length; i++) {
+      if (i === 0) {
+        tempStreak = 1;
+      } else {
+        const prev = new Date(completedDates[i - 1] + 'T00:00:00').getTime();
+        const curr = new Date(completedDates[i] + 'T00:00:00').getTime();
+        const diffDays = Math.round((curr - prev) / ONE_DAY);
+        if (diffDays === 1) tempStreak += 1;
+        else if (diffDays > 1) tempStreak = 1;
+      }
+      if (tempStreak > bestStreak) bestStreak = tempStreak;
+    }
+    
+    if (completedDates.length > 0) {
+      const lastDate = new Date(completedDates[completedDates.length - 1] + 'T00:00:00').getTime();
+      const todayStr = new Date().toLocaleDateString('en-CA'); // local YYYY-MM-DD
+      const today = new Date(todayStr + 'T00:00:00').getTime();
+      const diffDays = Math.round((today - lastDate) / ONE_DAY);
+      
+      if (diffDays <= 1) currentStreak = tempStreak;
+    }
+
+    uniqueDates.forEach(date => {
+      const completedOnDate = logs.filter(l => l.date === date && l.completed).length;
+      if (completedOnDate === habits.length && habits.length > 0) perfectDays += 1;
+    });
+
+    const totalLogged = logs.filter(l => l.completed).length;
+
+    return { overallTrend, habitStats, bestHabit, needsWorkHabit, avgRate, uniqueDates, currentStreak, bestStreak, perfectDays, totalLogged }
   }, [habits, logs, daysFilter])
 
   // Selected Habit Data
@@ -115,6 +153,41 @@ export function ProgressCharts({ categories, habits, logs }: { categories: Categ
 
   return (
     <div className="flex flex-col gap-6 w-full animate-in fade-in slide-in-from-bottom-4 duration-500">
+
+      {/* Gamification Badges Row */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 w-full">
+        <div className="bg-gradient-to-br from-orange-50 to-orange-100 dark:from-orange-900/40 dark:to-orange-800/20 border border-orange-200 dark:border-orange-800/50 p-4 rounded-2xl shadow-sm flex flex-col items-center justify-center text-center gap-2">
+          <Flame className="w-8 h-8 text-orange-500 dark:text-orange-400" />
+          <div>
+            <p className="text-2xl font-black text-orange-700 dark:text-orange-300">{metrics.currentStreak} <span className="text-sm font-medium">Days</span></p>
+            <p className="text-xs text-orange-600/80 dark:text-orange-400/80 font-bold uppercase tracking-wider">Current Streak</p>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 dark:from-yellow-900/40 dark:to-yellow-800/20 border border-yellow-200 dark:border-yellow-800/50 p-4 rounded-2xl shadow-sm flex flex-col items-center justify-center text-center gap-2">
+          <Crown className="w-8 h-8 text-yellow-500 dark:text-yellow-400" />
+          <div>
+            <p className="text-2xl font-black text-yellow-700 dark:text-yellow-300">{metrics.perfectDays} <span className="text-sm font-medium">Days</span></p>
+            <p className="text-xs text-yellow-600/80 dark:text-yellow-400/80 font-bold uppercase tracking-wider">Perfect Days</p>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-blue-50 to-blue-100 dark:from-blue-900/40 dark:to-blue-800/20 border border-blue-200 dark:border-blue-800/50 p-4 rounded-2xl shadow-sm flex flex-col items-center justify-center text-center gap-2">
+          <Trophy className="w-8 h-8 text-blue-500 dark:text-blue-400" />
+          <div>
+            <p className="text-2xl font-black text-blue-700 dark:text-blue-300">{metrics.bestStreak} <span className="text-sm font-medium">Days</span></p>
+            <p className="text-xs text-blue-600/80 dark:text-blue-400/80 font-bold uppercase tracking-wider">All-Time Best</p>
+          </div>
+        </div>
+
+        <div className="bg-gradient-to-br from-purple-50 to-purple-100 dark:from-purple-900/40 dark:to-purple-800/20 border border-purple-200 dark:border-purple-800/50 p-4 rounded-2xl shadow-sm flex flex-col items-center justify-center text-center gap-2">
+          <Star className="w-8 h-8 text-purple-500 dark:text-purple-400" />
+          <div>
+            <p className="text-2xl font-black text-purple-700 dark:text-purple-300">{metrics.totalLogged} <span className="text-sm font-medium">Habits</span></p>
+            <p className="text-xs text-purple-600/80 dark:text-purple-400/80 font-bold uppercase tracking-wider">Total Completed</p>
+          </div>
+        </div>
+      </div>
       
       {/* Top Stats Row (4 columns) */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
